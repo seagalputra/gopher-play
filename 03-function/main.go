@@ -29,9 +29,67 @@ func main() {
 	fmt.Printf("luas lingkaran\t\t: %.2f \n", area)
 	fmt.Printf("keliling lingkaran\t: %.2f \n", circumference)
 
-	var avg = calculateAverage(2, 4, 3, 5, 4, 3, 3, 5, 5, 3)
+	var numbers = []int{2, 4, 3, 5, 4, 3, 3, 5, 5, 3}
+	var avg = calculateAverage(numbers...)
 	var msg = fmt.Sprintf("Rata-rata : %.2f", avg)
 	fmt.Println(msg)
+
+	yourHobbies("wick", "sleeping", "eating")
+
+	var getMinMax = func(n []int) (int, int) {
+		var min, max int
+		for i, e := range n {
+			switch {
+			case i == 0:
+				max, min = e, e
+			case e > max:
+				max = e
+			case e < min:
+				min = e
+			}
+		}
+		return min, max
+	}
+
+	var min, max = getMinMax(numbers)
+	fmt.Printf("data : %v\nmin   : %v\nmax   : %v\n", numbers, min, max)
+
+	var newNumbers = func(min int) []int {
+		var r []int
+		for _, e := range numbers {
+			if e < min {
+				continue
+			}
+			r = append(r, e)
+		}
+		return r
+	}(3)
+
+	fmt.Println("original number :", numbers)
+	fmt.Println("filtered number :", newNumbers)
+
+	var howMany, getNumbers = findMax(numbers, 3)
+	var theNumbers = getNumbers()
+
+	fmt.Println("numbers\t:", numbers)
+	fmt.Printf("find \t: %d\n\n", 3)
+
+	fmt.Println("found \t:", howMany)
+	fmt.Println("value \t:", theNumbers)
+
+	var data = []string{"wick", "jason", "ethan"}
+	var dataContains0 = filter(data, func(each string) bool {
+		return strings.Contains(each, "o")
+	})
+	var dataLength5 = filter(data, func(each string) bool {
+		return len(each) == 5
+	})
+
+	fmt.Println("data asli \t\t:", data)
+
+	fmt.Println("filter ada huruf \"o\"\t:", dataContains0)
+
+	fmt.Println("filter jumlah huruf \"5\"\t:", dataLength5)
 }
 
 func printMessage(message string, arr []string) {
@@ -69,4 +127,37 @@ func calculateAverage(numbers ...int) float64 {
 
 	var avg = float64(total) / float64(len(numbers))
 	return avg
+}
+
+func yourHobbies(name string, hobbies ...string) {
+	var hobbiesAsString = strings.Join(hobbies, ", ")
+
+	fmt.Printf("Hello, my name is: %s\n", name)
+	fmt.Printf("My hobbies are: %s\n", hobbiesAsString)
+}
+
+func findMax(numbers []int, max int) (int, func() []int) {
+	var res []int
+	for _, e := range numbers {
+		if e <= max {
+			res = append(res, e)
+		}
+	}
+
+	return len(res), func() []int {
+		return res
+	}
+}
+
+type FilterCallback func(string) bool
+
+func filter(data []string, callback FilterCallback) []string {
+	var result []string
+	for _, each := range data {
+		if filtered := callback(each); filtered {
+			result = append(result, each)
+		}
+	}
+
+	return result
 }
