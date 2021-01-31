@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"runtime"
+	"time"
 )
 
 func print(till int, message string) {
@@ -31,6 +33,50 @@ func getMax(numbers []int, ch chan int) {
 		}
 	}
 	ch <- max
+}
+
+func sendMessage(ch chan<- string) {
+	for i := 0; i < 20; i++ {
+		ch <- fmt.Sprintf("data %d", i)
+	}
+	close(ch)
+}
+
+func PrintMessage(ch <-chan string) {
+	for message := range ch {
+		fmt.Println(message)
+	}
+}
+
+func sendData(ch chan<- int) {
+	for i := 0; true; i++ {
+		ch <- i
+		time.Sleep(time.Duration(rand.Int()%10+1) * time.Second)
+	}
+}
+
+func retrieveData(ch <-chan int) {
+loop:
+	for {
+		select {
+		case data := <-ch:
+			fmt.Print(`receive data"`, data, `"`, "\n")
+		case <-time.After(time.Second * 5):
+			fmt.Println("timeout, no activities under 5 seconds")
+			break loop
+		}
+	}
+}
+
+func orderSomeFood(menu string) {
+	defer fmt.Println("Terima kasih, silahkan tunggu")
+	if menu == "pizza" {
+		fmt.Println("Pilihan tepat!", " ")
+		fmt.Print("Pizza ditempat kami paling enak!", "\n")
+		return
+	}
+
+	fmt.Println("Pesanan anda: ", menu)
 }
 
 func main() {
@@ -105,4 +151,20 @@ func main() {
 			fmt.Printf("Max \t: %d \n", max)
 		}
 	}
+
+	var ch3 = make(chan string)
+	go sendMessage(ch3)
+	PrintMessage(ch3)
+
+	rand.Seed(time.Now().Unix())
+	var ch4 = make(chan int)
+
+	go sendData(ch4)
+	retrieveData(ch4)
+
+	defer fmt.Println("halo")
+	fmt.Println("selamat datang")
+
+	orderSomeFood("pizza")
+	orderSomeFood("burger")
 }
